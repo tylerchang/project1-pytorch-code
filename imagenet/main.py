@@ -20,6 +20,7 @@ import torchvision.models as models
 import torchvision.transforms as transforms
 from torch.optim.lr_scheduler import StepLR
 from torch.utils.data import Subset
+import torch.cuda.profiler as profiler
 
 model_names = sorted(name for name in models.__dict__
     if name.islower() and not name.startswith("__")
@@ -317,6 +318,13 @@ def train(train_loader, model, criterion, optimizer, epoch, device, args):
 
     end = time.time()
     for i, (images, target) in enumerate(train_loader):
+
+        if i == 5:  # Start profiling after 5 batches for warmup
+            torch.cuda.profiler.start()
+        elif i == 10:  # Profile for 5 batches
+            torch.cuda.profiler.stop()
+            break  # Optional: stop after profiling
+
         # measure data loading time
         data_time.update(time.time() - end)
 
